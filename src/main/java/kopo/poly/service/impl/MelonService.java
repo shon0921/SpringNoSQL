@@ -116,4 +116,28 @@ public class MelonService implements IMelonService {
 
         return rList;
     }
+
+    @Override
+    public List<MelonDTO> getSingerSong(MelonDTO pDTO) throws Exception {
+
+        log.info("{}.getSingerSong Start!", this.getClass().getName());
+
+        // MongoDB에 저장된 컬렉션 이름
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        // 결과값
+        List<MelonDTO> rList = null;
+
+        // Melon 노래 수집하기
+        if (this.collectMelonSong() == 1) {
+
+            // 가수 노래 조회하기
+            rList = melonMapper.getSingerSong(colNm, pDTO);
+
+        }
+
+        log.info("{}.getSingerSong End!", this.getClass().getName());
+
+        return rList;
+    }
 }

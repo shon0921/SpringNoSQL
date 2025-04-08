@@ -6,9 +6,9 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import kopo.poly.dto.MelonDTO;
+import kopo.poly.dto.MongoDTO;
 import kopo.poly.persistance.mongodb.AbstractMongoDBComon;
 import kopo.poly.persistance.mongodb.IMelonMapper;
-import kopo.poly.persistance.mongodb.IMongoMapper;
 import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -129,6 +129,47 @@ public class MelonMapper extends AbstractMongoDBComon implements IMelonMapper {
         }
 
         log.info("{}.getSingerSongCnt End!", this.getClass().getName());
+
+        return rList;
+    }
+
+    @Override
+    public List<MelonDTO> getSingerSong(String colNm, MelonDTO pDTO) throws MongoException {
+
+        log.info("{}.getSingerSong Start!", this.getClass().getName());
+
+        // 조회 결과를 전달하기 위해 객체 생성하기
+        List<MelonDTO> rList = new LinkedList<>();
+
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        // 조회할 조건(SQL의 WHERE 역할 / SELECT song, singer FROM MELON_20220321 where singer ='방탄소년단')
+        Document query = new Document();
+        query.append("singer", CmmUtil.nvl(pDTO.singer()));
+
+        // 조회 결과 중 출력할 칼럼들(SQL의 SELECT절과 FROM절 가운제 컬럼들과 유사함)
+        Document projection = new Document();
+        projection.append("song", "$song");
+        projection.append("singer", "$singer");
+
+        // MongoDB는 무조건 ObjectId가 자동생성되며, ObjectID는 사용하지 않을때, 조회할 필요가 없음
+        // ObjectId를 가지고 오지 않을 때 사용함
+        projection.append("_id", 0);
+
+        // MongoDB의 find 명령어롤 통해 조회할 경우 사용함
+        // 조회하는 데이터의 양이 적은 경우, find를 사용하고, 데이터량이 많은 경우 무조건 Aggregate 사용한다.
+        FindIterable<Document> rs = col.find(query).projection(projection);
+
+        for (Document doc : rs) {
+            String song = CmmUtil.nvl(doc.getString("song"));
+            String singer = CmmUtil.nvl(doc.getString("singer"));
+
+            MelonDTO rDTO = MelonDTO.builder().singer(singer).song(song).build();
+
+            // 레코드 결과를 List에 저장하기
+            rList.add(rDTO);
+        }
+        log.info("{}.getSingerSong End!", this.getClass().getName());
 
         return rList;
     }

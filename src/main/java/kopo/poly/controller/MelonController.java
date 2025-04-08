@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -83,6 +84,24 @@ public class MelonController {
                 .orElseGet(ArrayList::new);
 
         log.info("{}.getSingerSongCnt End!", this.getClass().getName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList));
+    }
+
+    @PostMapping(value = "getSingerSong")
+    public ResponseEntity<CommonResponse<List<MelonDTO>>> getSingerSong(@RequestBody MelonDTO pDTO)
+            throws Exception {
+
+        log.info("{}.getSingerSong Start!", this.getClass().getName());
+
+        log.info("pDTO: {}", pDTO); // JSON 구조로 받은 값이 잘 받았는지 확인하기 위해 로그 찍기
+
+        // Java 8부터 제공되는 Optional 활용하여 NPE(Null Pointer Exception) 처리
+        List<MelonDTO> rList = Optional.ofNullable(melonService.getSingerSong(pDTO))
+                .orElseGet(ArrayList::new);
+
+        log.info("{}.getSingerSong End!", this.getClass().getName());
 
         return ResponseEntity.ok(
                 CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList));

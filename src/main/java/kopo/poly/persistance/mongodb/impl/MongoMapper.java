@@ -2,6 +2,7 @@ package kopo.poly.persistance.mongodb.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
+import kopo.poly.dto.MelonDTO;
 import kopo.poly.dto.MongoDTO;
 import kopo.poly.persistance.mongodb.AbstractMongoDBComon;
 import kopo.poly.persistance.mongodb.IMongoMapper;
@@ -11,6 +12,7 @@ import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 

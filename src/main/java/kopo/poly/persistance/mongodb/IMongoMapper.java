@@ -1,6 +1,9 @@
 package kopo.poly.persistance.mongodb;
 
+import kopo.poly.dto.MelonDTO;
 import kopo.poly.dto.MongoDTO;
+
+import java.util.List;
 
 public interface IMongoMapper {
 
@@ -12,4 +15,5 @@ public interface IMongoMapper {
         @return 저장 결과
      */
     int insertData(MongoDTO pDTO, String colNm) throws Exception;
+
 }

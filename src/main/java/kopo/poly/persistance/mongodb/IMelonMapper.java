@@ -1,6 +1,7 @@
 package kopo.poly.persistance.mongodb;
 
 import kopo.poly.dto.MelonDTO;
+import kopo.poly.dto.MongoDTO;
 
 import java.util.List;
 
@@ -30,4 +31,13 @@ public interface IMelonMapper {
         @return 노래 리스트
      */
     List<MelonDTO> getSingerSongCnt(String colNm) throws Exception;
+
+    /*
+        가수 이름으로 조회하기
+
+        @param colNm 조회할 컬렉션 이름
+        @param pDTO 가수명
+        @return 노래 리스트
+     */
+    List<MelonDTO> getSingerSong(String colNm, MelonDTO pDTO) throws Exception;
 }
