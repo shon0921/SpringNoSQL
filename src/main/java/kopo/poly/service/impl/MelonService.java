@@ -34,7 +34,7 @@ public class MelonService implements IMelonService {
         List<MelonDTO> pList = new LinkedList<>();
 
         // 멜론 Top100 중 50위까지 정보 가져오는 페이지
-        String url = "https://www.melon.com/chart/index.html";
+        String url = "https://www.melon.com/chart/index.htm";
 
         // JSOUP 라이브러리를 통해 사이트 접속되면, 그 사이트의 전체 HTML소스 저장할 변수
         Document doc = Jsoup.connect(url).get();
@@ -99,6 +99,20 @@ public class MelonService implements IMelonService {
         List<MelonDTO> rList = melonMapper.getSongList(colNm); // MongoDB에서 데이터 가져오기
 
         log.info("{}.getSongList End!", this.getClass().getName());
+
+        return rList;
+    }
+
+    @Override
+    public List<MelonDTO> getSingerSongCnt() throws Exception {
+
+        log.info("{}.getSingerSongCnt Start!", this.getClass().getName());
+
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        List<MelonDTO> rList = melonMapper.getSingerSongCnt(colNm);
+
+        log.info("{}.getSingerSongCnt End!", this.getClass().getName());
 
         return rList;
     }

@@ -2,6 +2,7 @@ package kopo.poly.persistance.mongodb.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoException;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import kopo.poly.dto.MelonDTO;
@@ -12,9 +13,11 @@ import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +90,45 @@ public class MelonMapper extends AbstractMongoDBComon implements IMelonMapper {
             rList.add(rDTO);
         }
         log.info("{}.getSongList End!", this.getClass().getName());
+
+        return rList;
+    }
+
+    @Override
+    public List<MelonDTO> getSingerSongCnt(String colNm) throws Exception {
+
+        log.info("{}.getSingerSongCnt Start!", this.getClass().getName());
+
+        // 조회 결과를 전달하기 위한 객체 생성하기
+        List<MelonDTO> rList = new LinkedList<>();
+
+        // MongoDB 조회 쿼리
+        List<? extends Bson> pipeline = Arrays.asList(
+                new Document().append("$group",
+                        new Document().append("_id", new Document().append("singer", "$singer")).append("COUNT(singer)",
+                                new Document().append("$sum", 1))),
+                new Document()
+                        .append("$project",
+                                new Document().append("singer", "$_id.singer").append("singerCnt", "$COUNT(singer)")
+                                    .append("_id", 0)),
+                new Document().append("$sort", new Document().append("singerCnt", -1)));
+
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+        AggregateIterable<Document> rs = col.aggregate(pipeline).allowDiskUse(true);
+
+        for (Document doc : rs) {
+            String singer = doc.getString("singer");
+            int singerCnt = doc.getInteger("singerCnt", 0);
+
+            log.info("singer : {}/ singerCnt: {}", singer, singerCnt);
+
+            MelonDTO rDTO = MelonDTO.builder().singer(singer).singerCnt(singerCnt).build();
+
+            rList.add(rDTO);
+
+        }
+
+        log.info("{}.getSingerSongCnt End!", this.getClass().getName());
 
         return rList;
     }

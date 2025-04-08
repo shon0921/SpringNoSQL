@@ -15,4 +15,9 @@ public interface IMelonService {
         오늘 수진된 멜론 노래리스트 가져오기
      */
     List<MelonDTO> getSongList() throws Exception;
+
+    /*
+        멜론 가수별 노래 수 가져오기
+     */
+    List<MelonDTO> getSingerSongCnt() throws Exception;
 }
