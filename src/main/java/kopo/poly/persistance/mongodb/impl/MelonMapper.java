@@ -95,7 +95,7 @@ public class MelonMapper extends AbstractMongoDBComon implements IMelonMapper {
     }
 
     @Override
-    public List<MelonDTO> getSingerSongCnt(String colNm) throws Exception {
+    public List<MelonDTO> getSingerSongCnt(String colNm) throws MongoException {
 
         log.info("{}.getSingerSongCnt Start!", this.getClass().getName());
 
@@ -164,7 +164,7 @@ public class MelonMapper extends AbstractMongoDBComon implements IMelonMapper {
             String song = CmmUtil.nvl(doc.getString("song"));
             String singer = CmmUtil.nvl(doc.getString("singer"));
 
-            MelonDTO rDTO = MelonDTO.builder().singer(singer).song(song).build();
+            MelonDTO rDTO = MelonDTO.builder().song(song).singer(singer).build();
 
             // 레코드 결과를 List에 저장하기
             rList.add(rDTO);

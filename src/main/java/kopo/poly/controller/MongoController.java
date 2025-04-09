@@ -25,29 +25,33 @@ public class MongoController {
     public ResponseEntity<?> basic(@Valid @RequestBody MongoDTO pDTO, BindingResult bindingResult)
             throws Exception {
 
-        log.info("{}.basicTest Start!", this.getClass().getName());
+        log.info("{}.basic Start!", this.getClass().getName());
 
+        // 1. DTO 유효성 검사 실패 시 에러 응답 반환
         if (bindingResult.hasErrors()) {    // Spting Validation 맞춰 잘 바인딩되었는지 체크
             return CommonResponse.getErrors(bindingResult); // 유효성 검증 결과에 따른 에러 메시지 전달
 
         }
 
-        String msg; // 저장 결과 메시지
+        
+        // 2. 전달받은 DTO 로그 출력
+        log.info("Received MongoDTO : {}", pDTO); // 입력 받은 값 확인하기
 
-        log.info("pDTO : {}", pDTO); // 입력 받은 값 확이하기
-
+        // 3. MongoDB에 데이터 저장 시도
         int res = mongoService.mongoTest(pDTO);
 
-        if (res == 1) {
-            msg = "저장 성공하였습니다.";
-        } else {
-            msg = "저장 실패하였습니다.";
-        }
+        // 4. 저장 결과 메시지 설정
+        String msg = (res == 1) ? "저장 성공하였습니다." : "저장 실패하였습니다";
 
-        MsgDTO dto = MsgDTO.builder().result(res).msg(msg).build();
+        // 5. 결과 메시지를 DTO로 구성
+        MsgDTO dto = MsgDTO.builder()
+                .result(res)
+                .msg(msg)
+                .build();
 
-        log.info("{}.basicTest End!", this.getClass().getName());
+        log.info("{}.basic End!", this.getClass().getName());
 
+        // 6. 공통 응답 객체에 결과 담아 반환
         return ResponseEntity.ok(
                 CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
     }

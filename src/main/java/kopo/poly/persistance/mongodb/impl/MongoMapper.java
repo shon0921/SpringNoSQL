@@ -1,6 +1,7 @@
 package kopo.poly.persistance.mongodb.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import kopo.poly.dto.MelonDTO;
 import kopo.poly.dto.MongoDTO;
@@ -24,7 +25,7 @@ public class MongoMapper extends AbstractMongoDBComon implements IMongoMapper {
     private final MongoTemplate mongodb;
 
     @Override
-    public int insertData(MongoDTO pDTO, String colNm) throws Exception {
+    public int insertData(MongoDTO pDTO, String colNm) throws MongoException {
 
         log.info("{}.insertData Start!", this.getClass().getName());
 

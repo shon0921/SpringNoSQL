@@ -1,7 +1,6 @@
 package kopo.poly.persistance.mongodb;
 
 import kopo.poly.dto.MelonDTO;
-import kopo.poly.dto.MongoDTO;
 
 import java.util.List;
 
