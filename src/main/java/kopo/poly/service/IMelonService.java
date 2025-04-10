@@ -27,4 +27,19 @@ public interface IMelonService {
         @return 노래 리스트
      */
     List<MelonDTO> getSingerSong(MelonDTO pDTO) throws Exception;
+
+    /*
+        수집된 멜론 차트 저장된 MongoDB 컬렉션 삭제하기
+     */
+    int dropCollection() throws Exception;
+
+    /*
+        멜론 노래 리스트 한 번에 저장하기
+     */
+    List<MelonDTO> insertManyField() throws Exception;
+
+    /*
+        singer 필드의 값인 방탄소년단을 BTS로 변경하기
+     */
+    List<MelonDTO> updateField(MelonDTO pDTO) throws Exception;
 }

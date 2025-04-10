@@ -139,4 +139,77 @@ public class MelonService implements IMelonService {
 
         return rList;
     }
+
+    @Override
+    public int dropCollection() throws Exception {
+
+        log.info("{}.dropCollection Start!", this.getClass().getName());
+
+        int res;
+
+        // MongoDB에 저장된 컬렉션 이름
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        // 기존 수집된 멜론 Top100 수집한 컬렉션 삭제하기
+        res = melonMapper.dropCollection(colNm);
+
+        log.info("{}.dropCollection End!", this.getClass().getName());
+
+        return res;
+    }
+
+    @Override
+    public List<MelonDTO> insertManyField() throws Exception {
+
+        // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
+        log.info("{}.insertManyField Start!", this.getClass().getName());
+
+        List<MelonDTO> rList = null; // 변경된 데이터 조회 결과
+
+        // 생성할 컬렉션명
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        // MongoDB에 데이터저장하기
+        if (melonMapper.insertManyField(colNm, this.doCollect()) == 1) {
+
+            // 변경된 값을 확인하기 위해 MonoDB로부터 데이터 조회하기
+            rList = melonMapper.getSongList(colNm);
+
+        }
+
+        // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
+        log.info("{}.insertManyField End!", this.getClass().getName());
+
+        return rList;
+    }
+
+    @Override
+    public List<MelonDTO> updateField(MelonDTO pDTO) throws Exception {
+
+        // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
+        log.info("{}.updateField Start!", this.getClass().getName());
+
+        List<MelonDTO> rList = null; // 변경된 데이터 조회 결과
+
+        // 수정할 컬렉션
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        // 기존 수집된 멜론Top100 수집한 컬렉션 삭제하기
+        melonMapper.dropCollection(colNm);
+
+        // 멜론Top100 수집하기
+        if (this.collectMelonSong() == 1) {
+
+            // 예 : singer 필드에 저장된 '방탄소년단' 값을 'BTS'로 변경하기
+            if (melonMapper.updateField(colNm, pDTO) == 1) {
+
+                // 변경된 값을 확인하기 위해 MongoDB로부터 데이터 조회하기
+                rList = melonMapper.getUpdateSinger(colNm, pDTO);
+            }
+        }
+
+        log.info("{}.updateField End!", this.getClass().getName());
+
+        return rList;
+    }
 }
