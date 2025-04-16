@@ -1,6 +1,7 @@
 package kopo.poly.persistance.mongodb.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.KerberosSubjectProvider;
 import com.mongodb.MongoException;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
@@ -445,5 +446,63 @@ public class MelonMapper extends AbstractMongoDBComon implements IMelonMapper {
         log.info("{}.getSingerSongMember End!", this.getClass().getName());
 
         return rList;
+    }
+
+    @Override
+    public int updateFieldAndAddField(String colNm, MelonDTO pDTO) throws MongoException {
+        log.info("{}.updateFieldAndAddField Start!", this.getClass().getName());
+        
+        int res;
+        
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+        
+        String singer = CmmUtil.nvl(pDTO.singer());
+        String updateSinger = CmmUtil.nvl(pDTO.updateSinger());
+        String addFieldValue = CmmUtil.nvl(pDTO.addFieldValue());
+        
+        log.info("pColNm : {}", colNm);
+        log.info("pDTO : {}", pDTO);
+        
+        // 업데이트할 필드 (기존 필드 수정 & 새로운 필드 추가)
+        Document update = new Document("$set", new Document("singer", updateSinger)
+                .append("addData", addFieldValue));
+        
+        // UPDATE MELON_20220321 SET singer = 'BTS' WHERE singer = '방탄소년단')
+        // Filters.eq : singer = '방탄소년단'
+        col.updateMany(Filters.eq("singer",singer), update);
+        
+        res = 1;
+        
+        log.info("{}.updateFieldAndAddField End!", this.getClass().getName());
+        
+        return res;
+    }
+
+    @Override
+    public List<MelonDTO> getSingerSongAddData(String colNm, MelonDTO pDTO) throws MongoException {
+        
+        log.info("{}.getSingerSongAddData Start!", this.getClass().getName());
+        
+        // 조회 결과를 전달하기 위한 객체 생성하기
+        List<MelonDTO> rList = new LinkedList<>();
+        
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+        
+        // 조회할 조건(SQL의 WHERE 역할 / SELECT songm singer FROM MELON_20220321 where singer = '방탄소년단')
+        Document query = new Document();
+        query.append("singer", CmmUtil.nvl(pDTO.updateSinger())); // 이전 실행에서 가수이름이 변경되어 변경시킬 값으로 적용
+        
+        // 조회 결과 중 출력할 칼럼들(SQL의 SELECT절과 FROM절 가운데 칼럼들과 유사함)
+        Document projection = new Document();
+        projection.append("song", "$song");
+        projection.append("singer", "$singer");
+        projection.append("addData", "$addData");
+        
+        // MongoDB는 무조건 ObjectId가 자동생성되며, ObjectID는 사용하지 않을때, 조회할 필요가 없음
+        // ObjectId를 가지고 오지 않을 때 사용함
+        projection.append("_id", 0);
+        
+        // MongoDB의 find 명령어를 통해 조회할 경우
+        return List.of();
     }
 }
