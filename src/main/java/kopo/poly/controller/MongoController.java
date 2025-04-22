@@ -55,4 +55,5 @@ public class MongoController {
         return ResponseEntity.ok(
                 CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
     }
+    //
 }
