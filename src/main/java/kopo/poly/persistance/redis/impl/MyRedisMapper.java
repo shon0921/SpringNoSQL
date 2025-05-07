@@ -12,6 +12,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -143,5 +144,110 @@ public class MyRedisMapper implements IMyRedisMapper {
         log.info("{}.getStringJSON End!", this.getClass().getName());
 
         return rDTO;
+    }
+
+    @Override
+    public int saveList(String redisKey, List<RedisDTO> pList) throws DataAccessException {
+
+        log.info("{}.saveList Start!", this.getClass().getName());
+
+        int res;
+
+        /*
+            redis 저장 및 읽기에 대한 데이터 타입 지정(String 타입으로 지정함
+         */
+        redisDB.setKeySerializer(new StringRedisSerializer());  // String 타입
+        redisDB.setValueSerializer(new StringRedisSerializer());    // String 타입
+
+        this.deleteRedisKey(redisKey);  // RedisDB 저장된 키 삭제
+
+        pList.forEach(dto -> {
+            // 오름차순으로 저장히기
+            // redisDB.opsForList().rightPush(redisKey, CmmUtil.nvl(dto.text())));
+
+            // 내림차수능로 저장하기
+            redisDB.opsForList().leftPush(redisKey, CmmUtil.nvl(dto.text()));
+        });
+
+        // 저장되는 데이터의 유효기간(TTL)은 5시간으로 정의
+        redisDB.expire(redisKey, 5, TimeUnit.HOURS);
+
+        res = 1;
+
+        log.info("{}.saveList End!", this.getClass().getName());
+
+        return res;
+    }
+
+    @Override
+    public List<String> getList(String redisKey) throws DataAccessException {
+
+        log.info("{}.getList Start!", this.getClass().getName());
+
+        List<String> rList = null;
+
+        /*
+            redis 저장 및 읽기에 대한 데이터 타입 지정(String 타입으로 지정함)
+         */
+        redisDB.setKeySerializer(new StringRedisSerializer());  // String 타입
+        redisDB.setValueSerializer(new StringRedisSerializer());    // String타입
+
+        if (Boolean.TRUE.equals(redisDB.hasKey(redisKey))) {
+            rList = (List) redisDB.opsForList().range(redisKey, 0, -1);
+        }
+
+        log.info("{}.getList End!", this.getClass().getName());
+
+        return rList;
+    }
+
+    @Override
+    public int saveListJSON(String redisKey, List<RedisDTO> pList) throws DataAccessException {
+
+        log.info("{}.saveListJSON Start!", this.getClass().getName());
+
+        int res;
+
+        // redisDB의 키의 데이터 타입을 String으로 정의(항상 String으로 설정함)
+        redisDB.setKeySerializer(new StringRedisSerializer());
+
+        // RedisDTO에 저장된 데이터를 자동으로 JSON으로 변경하기
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        this.deleteRedisKey(redisKey);  // RedisDB 저장된 키 삭제
+
+        // 람다식 사용하여 데이터 저장
+        pList.forEach(dto -> redisDB.opsForList().rightPush(redisKey, dto));
+
+        // 저장되는 데이터의 유효기간(TTL)은 5시간으로 정의
+        redisDB.expire(redisKey, 5, TimeUnit.HOURS);
+
+        res = 1;
+
+        log.info("{}.saveListJSON End!", this.getClass().getName());
+
+        return res;
+    }
+
+    @Override
+    public List<RedisDTO> getListJSON(String redisKey) throws DataAccessException {
+
+        log.info("{}.getListJSON Start!", this.getClass().getName());
+
+        List<RedisDTO> rList = null;
+
+        // redisDB의 키의 데이터 타입을 String으로 정의(항상 String으로 설정함)
+        redisDB.setKeySerializer(new StringRedisSerializer());
+
+        // RedisDTO에 저장된 데이터를 자동으로 JSON으로 변경하기
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        if (Boolean.TRUE.equals(redisDB.hasKey(redisKey))) {
+            rList = (List) redisDB.opsForList().range(redisKey, 0, -1);
+        }
+
+        log.info("{}.getListJSON End!", this.getClass().getName());
+
+        return rList;
     }
 }

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -58,5 +60,25 @@ public class RedisController {
 
         return ResponseEntity.ok(
                 CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rDTO));
+    }
+
+    /*
+        List 타입에 여러 문자열로 저장하기(동기화)
+     */
+    @PostMapping(value = "saveList")
+    public ResponseEntity<CommonResponse<List<String>>> saveList(@RequestBody List<RedisDTO> pList) throws Exception {
+
+        log.info("{}.saveList Start", this.getClass().getName());
+
+        log.info("pList :  {}", pList); // 전달받은 값 로그로 확인하기!(반드시 작성하기)
+
+        // Java 8부터 제공되는 Optional 활용하여 NPE(Null Pointer Exception) 처리
+        List<String> rList = Optional.ofNullable(myRedisService.saveList(pList))
+                .orElseGet(ArrayList::new);
+
+        log.info("{}.saveList End", this.getClass().getName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList));
     }
 }
