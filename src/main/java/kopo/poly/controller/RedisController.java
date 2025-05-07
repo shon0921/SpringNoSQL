@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @RequestMapping(value = "/redis/v1")
@@ -81,4 +79,66 @@ public class RedisController {
         return ResponseEntity.ok(
                 CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList));
     }
+
+    /*
+        List타입에 JSON 형태로 저장하기(동기화)
+     */
+    @PostMapping(value = "saveListJSON")
+    public ResponseEntity<CommonResponse<List<RedisDTO>>> saveListJSON(@RequestBody List<RedisDTO> pList) throws Exception {
+
+        log.info("{}.saveListJSON Start!", this.getClass().getName());
+
+        log.info("pList :  {}", pList); // 전달받은 값 로그로 확인하기!(반드시 작성하기)
+
+        // Java 8부터 제공되는 Optional 활용하여 NPE(Null Pointer Exception) 처리
+        List<RedisDTO> rList = Optional.ofNullable(myRedisService.saveListJSON(pList))
+                .orElseGet(ArrayList::new);
+
+        log.info("{}.saveListJSON End!", this.getClass().getName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList));
+    }
+
+    /*
+        Hash 타입에 문자열 형태로 저장하기
+     */
+    @PostMapping(value = "saveHash")
+    public ResponseEntity<CommonResponse<RedisDTO>> saveHash(@RequestBody RedisDTO pDTO) throws Exception {
+
+        log.info("{}.saveHash Start!", this.getClass().getName());
+
+        log.info("pDTO : {}", pDTO);    // 전달받은 값 로그로 확인하기!(반드시 작성하기)
+
+        // Java 8 부터 제공되는 Optional 활용하여 NPE(Null Pointer Exception) 처리
+        RedisDTO rDTO = Optional.ofNullable(myRedisService.saveHash(pDTO))
+                .orElseGet(() -> RedisDTO.builder().build());
+
+        log.info("{}.saveHash End!", this.getClass().getName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rDTO)
+        );
+    }
+
+    /*
+        Set타입에 JSON 형태로 람다식을 이용하여 저장하기
+     */
+    @PostMapping(value = "saveSetJSON")
+    public ResponseEntity<CommonResponse<Set<RedisDTO>>> saveSetJSON(@RequestBody List<RedisDTO> pList) throws Exception {
+
+        log.info("{}.saveSetJSON Start!", this.getClass().getName());
+
+        log.info("pList :  {}", pList);
+
+        // Java 8부터 제공되는 Optional 활용하여 NPE(Null Pointer Exception) 처리
+        Set<RedisDTO> rSet = Optional.ofNullable(myRedisService.saveSetJSON(pList)).orElseGet(HashSet::new);
+
+        log.info("{}.saveSetJSON End!", this.getClass().getName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rSet));
+    }
+
+
 }

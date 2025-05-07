@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -95,6 +96,84 @@ public class MyRedisService implements IMyRedisService {
         log.info("{}.saveList End", this.getClass().getName());
 
         return rList;
+    }
+
+    @Override
+    public List<RedisDTO> saveListJSON(List<RedisDTO> pList) throws Exception {
+
+        log.info("{}.saveListJSON Start!", this.getClass().getName());
+
+        // 저장할 RedisDB 키
+        String redisKey = "myRedis_List_JSON";
+
+        // 저장 결과
+        List<RedisDTO> rList;
+
+        int res = myRedisMapper.saveListJSON(redisKey, pList);
+
+        if (res == 1) { // Redis 저장이 성공하면, 저장된 데이터 가져오기
+            rList = myRedisMapper.getListJSON(redisKey);
+
+        } else {
+            log.info("Redis 저장 실패!!");
+            throw new Exception("Redis 저장 실패!!");
+        }
+
+        log.info("{}.saveListJSON End", this.getClass().getName());
+
+
+        return rList;
+    }
+
+    @Override
+    public RedisDTO saveHash(RedisDTO pDTO) throws Exception {
+
+        log.info("{}.saveHash Start!", this.getClass().getName());
+
+        //  저장할 RedisDB키
+        String redisKey = "myRedis_Hash";
+
+        // 저장 결과
+        RedisDTO rDTO;
+
+        int res = myRedisMapper.saveHash(redisKey, pDTO);
+
+        if (res == 1) { // Redis 저장이 성송하면, 저장된 데이터 가져오기
+            rDTO = myRedisMapper.getHash(redisKey);
+
+        } else {
+            log.info("Redis 저장 실패!!");
+            throw new Exception("Redis 저장 실패");
+        }
+
+        log.info("{}.saveHash End!", this.getClass().getName());
+
+        return rDTO;
+    }
+
+    @Override
+    public Set<RedisDTO> saveSetJSON(List<RedisDTO> pList) throws Exception {
+
+        log.info("{}.saveSetJSON Start!", this.getClass().getName());
+
+        // 저장할 RedisDB 키
+        String redisKey = "myRedis_Set_JSON";
+
+        // 저장 결과
+        Set<RedisDTO> rSet;
+
+        int res = myRedisMapper.saveSetJSON(redisKey, pList);
+
+        if (res == 1) { // Redis 저장이 성공하면, 저장된 데이터 가져오기
+            rSet = myRedisMapper.getSetJSON(redisKey);
+        } else {
+            log.info("Redis 저장 실패!!");
+            throw new Exception("Redis 저장 실패 !!");
+        }
+
+        log.info("{}.saveSetJSON End!", this.getClass().getName());
+
+        return rSet;
     }
 }
 
