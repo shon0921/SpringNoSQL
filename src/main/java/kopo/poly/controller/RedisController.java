@@ -39,4 +39,24 @@ public class RedisController {
                 CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rDTO));
 
     }
+
+    /*
+        Redis 문자열을 JSON으로 저장 실습
+     */
+    @PostMapping(value = "saveStringJSON")
+    public ResponseEntity<CommonResponse<RedisDTO>> saveStringJSON(@RequestBody RedisDTO pDTO) throws Exception {
+
+        log.info("{}.saveStringJSON Start", this.getClass().getName());
+
+        log.info("pDTO : {}", pDTO);    // 전달받은 값 로그로 확인하기!(반드시 작성하기)
+
+        // Java 8부터 제공되는 Optional 활용하여 NPE(Null Pointer Exception) 처리
+        RedisDTO rDTO = Optional.ofNullable(myRedisService.saveStringJSON(pDTO))
+                .orElseGet(() -> RedisDTO.builder().build());
+
+        log.info("{}.saveStringJSON End", this.getClass().getName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rDTO));
+    }
 }

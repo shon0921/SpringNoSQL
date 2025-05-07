@@ -3,10 +3,12 @@ package kopo.poly.persistance.redis.impl;
 import kopo.poly.dto.RedisDTO;
 import kopo.poly.persistance.redis.IMyRedisMapper;
 import kopo.poly.util.CmmUtil;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
@@ -22,17 +24,17 @@ public class MyRedisMapper implements IMyRedisMapper {
     /*
         RedisDB 저장된 키 삭제하는 공통 함수
      */
-    private void deleteRedisKey(String rediskey) {
+    private void deleteRedisKey(String redisKey) {
         
-        if(Boolean.TRUE.equals(redisDB.hasKey(rediskey))) { // 데이터가 존재하면, 기존 데이터 삭제하기
-            redisDB.delete(rediskey); // 삭제하기
+        if(Boolean.TRUE.equals(redisDB.hasKey(redisKey))) { // 데이터가 존재하면, 기존 데이터 삭제하기
+            redisDB.delete(redisKey); // 삭제하기
             
             log.info("삭제 성공!");
         }
     }
     
     @Override
-    public int saveString(String rediskey, RedisDTO pDTO) throws DataAccessException {
+    public int saveString(String redisKey, RedisDTO pDTO) throws DataAccessException {
 
         log.info("{}.saveString Start!", this.getClass().getName());
 
@@ -46,14 +48,14 @@ public class MyRedisMapper implements IMyRedisMapper {
         redisDB.setKeySerializer(new StringRedisSerializer());  // String 타임
         redisDB.setValueSerializer(new StringRedisSerializer());    // String 타입
 
-        this.deleteRedisKey(rediskey);  //RedisDB 저장된 키 삭제
+        this.deleteRedisKey(redisKey);  //RedisDB 저장된 키 삭제
 
         // 데이터 저장하기
-        redisDB.opsForValue().set(rediskey, saveData);
+        redisDB.opsForValue().set(redisKey, saveData);
 
         // RedisDB에 저장하는 데이터의 유효기간 설정(TTL 설정)
         // 2일이 지나면, 자동으로 데이터가 삭제되도록 설정함
-        redisDB.expire(rediskey, 2, TimeUnit.DAYS);
+        redisDB.expire(redisKey, 2, TimeUnit.DAYS);
 
         res = 1;
 
@@ -86,6 +88,59 @@ public class MyRedisMapper implements IMyRedisMapper {
         }
 
         log.info("{}.getString End!", this.getClass().getName());
+
+        return rDTO;
+    }
+
+    @Override
+    public int saveStringJSON(String redisKey, RedisDTO pDTO) throws DataAccessException {
+
+        log.info("{}.saveStringJSON Start!", this.getClass().getName());
+
+        int res;
+
+        // redisDB의 키의 데이터 타입을 String으로 정의(항상 String으로 설정함)
+        redisDB.setKeySerializer(new StringRedisSerializer());
+
+        // RedisDTO에 저장된 데이터를 자동으로 JSON으로 변경하기
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        this.deleteRedisKey(redisKey);  // RedisDB 저장된 키 삭제
+
+        // 데이터 저장하기
+        redisDB.opsForValue().set(redisKey, pDTO);
+
+        // RedisDB에 저장되는 데이터의 유효시간 설정(TTL 설정)
+        // 2일이 지나면, 자동으로 데이터가 삭제되도록 설정함
+        redisDB.expire(redisKey, 2, TimeUnit.DAYS);
+
+        res = 1;
+
+        log.info("{}.saveStringJSON End!", this.getClass().getName());
+
+        return res;
+    }
+
+    @Override
+    public RedisDTO getStringJSON(String redisKey) throws DataAccessException {
+        log.info("{}.getStringJSON Start!", this.getClass().getName());
+
+        log.info("String redisKey: {}", redisKey);
+
+        RedisDTO rDTO = null;
+
+        // redisDB의 키의 데이터 타입을 String으로 정의(항상 String으로 설정함)
+        redisDB.setKeySerializer(new StringRedisSerializer());  // String 타입
+
+        // RedisDTO에 저장된 데이터를 자동으로 JSON으로 변경하기
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        if (Boolean.TRUE.equals(redisDB.hasKey(redisKey))) {    // 데이터가 존재하면, 조회하기
+            rDTO = (RedisDTO) redisDB.opsForValue().get(redisKey);  // redisKey 통해 조회하기
+
+        }
+
+        log.info("{}.getStringJSON End!", this.getClass().getName());
 
         return rDTO;
     }
