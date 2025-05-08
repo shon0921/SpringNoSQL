@@ -175,6 +175,33 @@ public class MyRedisService implements IMyRedisService {
 
         return rSet;
     }
+
+    @Override
+    public Set<RedisDTO> saveZSetJSON(List<RedisDTO> pList) throws Exception {
+
+        log.info("{}.saveZSetJSON Start!", this.getClass().getName());
+
+        // 저장할 RedisDB 키
+        String redisKey = "myRedis_ZSet_JSON";
+
+        // 저장 결과
+        Set<RedisDTO> rSet;
+
+        int res = myRedisMapper.saveZSetJSON(redisKey, pList);
+
+        if (res == 1) { // Redis 저장이 성공하며느 저장된 데이터 가져오기
+            rSet = myRedisMapper.getZSetJSON(redisKey);
+
+        } else {
+            log.info("Redis 저장 실패!!");
+            throw new Exception("Redis 저장 실패!!");
+
+        }
+
+        log.info("{}.saveZSetJSON End!", this.getClass().getName());
+
+        return rSet;
+    }
 }
 
 

@@ -368,4 +368,58 @@ public class MyRedisMapper implements IMyRedisMapper {
 
         return rSet;
     }
+
+    @Override
+    public int saveZSetJSON(String redisKey, List<RedisDTO> pList) throws DataAccessException {
+
+        log.info("{}.saveZSetJSON Start!", this.getClass().getName());
+
+        int res;
+
+        // redisDB의 키의 데이터 타입을 String으로 정의(항상 String으로 설정함)
+        redisDB.setKeySerializer(new StringRedisSerializer());  // String 타입
+
+        // RedisDTO에 저장된 데이터를 자동으로 JSON으로 변경하기
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        this.deleteRedisKey(redisKey);  // RedisDB 저장된 키 삭제
+
+        pList.forEach(dto -> {
+            redisDB.opsForSet().add(redisKey, dto, dto.order());    // 저장순서는 order 값에 따름
+
+        });
+
+        // 저장되는 데이터의 유효기간(TTL)은 5시간으로 정의
+        redisDB.expire(redisKey, 5, TimeUnit.HOURS);
+
+        res = 1;
+
+        log.info("{}.saveZSetJSON End!", this.getClass().getName());
+
+        return res;
+    }
+
+    @Override
+    public Set<RedisDTO> getZSetJSON(String redisKey) throws DataAccessException {
+
+        log.info("{}.getZSetJSON Start!", this.getClass().getName());
+
+        // 결과값 전달할 객체
+        Set<RedisDTO> rSet = null;
+
+        // redisDB의 키의 데이터 타입을 String으로 정의(항상 String으로 설정함)
+        redisDB.setKeySerializer(new StringRedisSerializer());  // String 타입
+
+        // RedisDTO에 저장된 데이터를 자동으로 JSON으로 변경하기
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        if (Boolean.TRUE.equals(redisDB.hasKey(redisKey))) {
+            rSet = (Set) redisDB.opsForZSet().range(redisKey, 0, -1);
+
+        }
+
+        log.info("{}.getZSetJSON End!", this.getClass().getName());
+
+        return rSet;
+    }
 }

@@ -139,6 +139,25 @@ public class RedisController {
         return ResponseEntity.ok(
                 CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rSet));
     }
+    
+    /*
+        ZSet타입에 JSON 형태로 저장하기
+     */
+    @PostMapping(value = "saveZSetJSON")
+    public ResponseEntity<CommonResponse<Set<RedisDTO>>> saveRedisZSetJSON(@RequestBody List<RedisDTO> pList) throws Exception {
+
+        log.info("{}.saveZSetJSON Start!", this.getClass().getName());
+
+        log.info("pList :  {}", pList);
+
+        // Java 8부터 제공되는 Optional 활용하여 NPE(Null Pointer Exception) 처리
+        Set<RedisDTO> rSet = Optional.ofNullable(myRedisService.saveZSetJSON(pList)).orElseGet(HashSet::new);
+
+        log.info("{}.saveZSetJSON End!", this.getClass().getName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rSet));
+    }
 
 
 }
