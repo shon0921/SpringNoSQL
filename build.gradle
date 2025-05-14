@@ -37,10 +37,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-    implementation 'org.slf4j:slf4j-api:2.0.13'
-    implementation 'ch.qos.logback:logback-classic:1.4.14'
 }
-
 tasks.named('test') {
     useJUnitPlatform()
 }

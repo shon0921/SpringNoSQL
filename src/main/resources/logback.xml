@@ -5,7 +5,7 @@
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
     <!-- 로그 파일 저장 위치 설정 -->
-    <property name="log_dir" value="/data/log/SpringNOSQL"/>
+    <property name="log_dir" value="/data/log/SpringNoSQL"/>
 
     <!-- 파일에 로그를 남기는 설정 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -20,22 +20,14 @@
         </rollingPolicy>
     </appender>
 
-    <!-- Fluentd로 로그 전송 -->
-    <appender name="FLUENTD" class="kopo.poly.config.FluentdAppender">
-        <remoteHost>${remoteHost}</remoteHost>
-        <port>${port}</port>
-        <tag>${tag}</tag>
-    </appender>
 
     <!-- 로그 레벨별 설정 -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FLUENTD"/>
     </root>
 
     <logger name="kopo.poly" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
-        <appender-ref ref="FLUENTD"/>
     </logger>
 </configuration>
